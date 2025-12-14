@@ -1,0 +1,136 @@
+@import 'tailwindcss';
+@import "tw-animate-css";
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    font-feature-settings: 'tnum' 1;
+  }
+}
+
+:root {
+  /* SavePlate Brand - Save Food. Save Money. Save the Planet. */
+  /* Using HSL for consistency */
+  --background: 0 0% 100%;
+  --foreground: 217 28% 17%;
+  
+  /* Card surfaces */
+  --card: 0 0% 100%;
+  --card-foreground: 217 28% 17%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 217 28% 17%;
+  
+  /* Primary - Fresh Green (#10B981) - Growth, sustainability, money savings */
+  --primary: 160 84% 39%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 160 80% 50%;
+  
+  /* Secondary - Warm Orange (#F59E0B) - Food, energy, warmth */
+  --secondary: 38 92% 50%;
+  --secondary-foreground: 0 0% 100%;
+  
+  /* Muted backgrounds */
+  --muted: 210 20% 97%;
+  --muted-foreground: 217 28% 40%;
+  
+  /* Accent - Deep Blue (#3B82F6) - Trust, professionalism, data */
+  --accent: 217 91% 60%;
+  --accent-foreground: 0 0% 100%;
+  
+  /* Destructive - Red (waste/issues) */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Borders and inputs */
+  --border: 214 20% 88%;
+  --input: 214 20% 88%;
+  --ring: 160 84% 39%;
+  --radius: 0.5rem;
+  
+  /* Chart colors - SavePlate themed */
+  --chart-1: 160 84% 39%; /* Fresh Green */
+  --chart-2: 38 92% 50%;  /* Warm Orange */
+  --chart-3: 217 91% 60%; /* Deep Blue */
+  --chart-4: 45 93% 47%;  /* Yellow */
+  --chart-5: 280 60% 50%; /* Purple */
+  
+  /* SavePlate Gradients - Sleek and modern */
+  --gradient-primary: linear-gradient(135deg, hsl(160 84% 39%), hsl(160 80% 50%));
+  --gradient-secondary: linear-gradient(135deg, hsl(38 92% 50%), hsl(45 92% 60%));
+  --gradient-hero: linear-gradient(135deg, hsl(160 84% 39%), hsl(217 91% 60%));
+  --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 20% 97%));
+  
+  /* Elegant Shadows with SavePlate brand */
+  --shadow-elegant: 0 10px 30px -10px hsl(160 84% 39% / 0.25);
+  --shadow-card: 0 4px 12px -2px hsl(217 28% 17% / 0.08);
+  --shadow-glow: 0 0 40px hsl(160 80% 50% / 0.3);
+  
+  /* Smooth Transitions */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  --background: 217 28% 7%;
+  --foreground: 0 0% 95%;
+  
+  --card: 217 25% 10%;
+  --card-foreground: 0 0% 95%;
+  --popover: 217 25% 10%;
+  --popover-foreground: 0 0% 95%;
+  
+  --primary: 160 80% 45%;
+  --primary-foreground: 217 28% 7%;
+  --primary-glow: 160 75% 55%;
+  
+  --secondary: 38 90% 48%;
+  --secondary-foreground: 0 0% 100%;
+  
+  --muted: 217 25% 15%;
+  --muted-foreground: 0 0% 65%;
+  
+  --accent: 217 85% 58%;
+  --accent-foreground: 0 0% 100%;
+  
+  --destructive: 0 80% 55%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --border: 217 25% 20%;
+  --input: 217 25% 20%;
+  --ring: 160 80% 45%;
+  
+  --shadow-elegant: 0 10px 30px -10px hsl(160 80% 45% / 0.4);
+  --shadow-card: 0 4px 12px -2px hsl(0 0% 0% / 0.4);
+  --shadow-glow: 0 0 40px hsl(160 75% 55% / 0.5);
+}
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+  --radius-2xl: calc(var(--radius) * 3);
+  --radius-full: 9999px;
+}

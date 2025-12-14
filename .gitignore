@@ -1,0 +1,53 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*-dist
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+**/agent-eval-report*
+packages
+pids
+.file-manifest
+.devcontainer/
+
+.spark-workbench-id
+
+# Security and sensitive files
+*.pem
+*.key
+*.cert
+secrets/
+.secrets
+
+# Build artifacts
+coverage/
+.nyc_output/
+
+# Testing
+test-results/
+playwright-report/

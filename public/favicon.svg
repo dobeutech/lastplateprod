@@ -1,0 +1,24 @@
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- SavePlate Icon - Plate with upward arrow + heart -->
+  
+  <!-- Plate base -->
+  <circle cx="24" cy="28" r="16" fill="#10B981" opacity="0.15" />
+  <circle cx="24" cy="28" r="14" stroke="#10B981" stroke-width="2.5" fill="none" />
+  
+  <!-- Upward arrow (reducing waste) -->
+  <path
+    d="M24 14V32M24 14L20 18M24 14L28 18"
+    stroke="#10B981"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  
+  <!-- Heart accent (altruism) -->
+  <path
+    d="M24 22C24 22 20 19 17 21C14 23 14 26 17 29C20 32 24 35 24 35C24 35 28 32 31 29C34 26 34 23 31 21C28 19 24 22 24 22Z"
+    fill="#F59E0B"
+    opacity="0.9"
+    transform="translate(7, -10) scale(0.35)"
+  />
+</svg>
