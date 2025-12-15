@@ -1,53 +1,125 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { InventoryItem, InventoryLevel, InventoryTransaction } from '@/lib/vendor-types';
+import { InventoryAPI, InventoryItem as APIInventoryItem, CreateInventoryItemInput } from '@/lib/api/inventory';
+import { logger } from '@/lib/logger';
 
-export function useInventoryItems(restaurantId: string) {
+// Re-export for compatibility
+export type InventoryItem = APIInventoryItem;
+
+export function useInventoryItems(locationId?: string) {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     fetchItems();
-  }, [restaurantId]);
+  }, [locationId]);
 
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('inventory_items')
-        .select('*')
-        .eq('restaurant_id', restaurantId)
-        .eq('is_active', true)
-        .order('item_name');
-
-      if (fetchError) throw fetchError;
-      setItems(data || []);
+      setError(null);
+      const data = await InventoryAPI.getAll();
+      setItems(data);
     } catch (err) {
+      logger.error('Failed to fetch inventory items', err as Error, { 
+        component: 'useInventoryItems' 
+      });
       setError(err as Error);
     } finally {
       setLoading(false);
     }
   };
 
-  const createItem = async (item: Partial<InventoryItem>) => {
-    const { data, error: createError } = await supabase
-      .from('inventory_items')
-      .insert([{ ...item, restaurant_id: restaurantId }])
-      .select()
-      .single();
-
-    if (createError) throw createError;
-    await fetchItems();
-    return data;
+  const createItem = async (item: CreateInventoryItemInput) => {
+    try {
+      const data = await InventoryAPI.create(item);
+      await fetchItems();
+      return data;
+    } catch (err) {
+      logger.error('Failed to create inventory item', err as Error, { 
+        component: 'useInventoryItems' 
+      });
+      throw err;
+    }
   };
 
-  const updateItem = async (id: string, updates: Partial<InventoryItem>) => {
-    const { data, error: updateError } = await supabase
-      .from('inventory_items')
-      .update(updates)
-      .eq('id', id)
-      .select()
+  const updateItem = async (id: string, updates: Partial<CreateInventoryItemInput>) => {
+    try {
+      const data = await InventoryAPI.update({ id, ...updates });
+      await fetchItems();
+      return data;
+    } catch (err) {
+      logger.error('Failed to update inventory item', err as Error, { 
+        component: 'useInventoryItems',
+        itemId: id 
+      });
+      throw err;
+    }
+  };
+
+  const deleteItem = async (id: string) => {
+    try {
+      await InventoryAPI.delete(id);
+      await fetchItems();
+    } catch (err) {
+      logger.error('Failed to delete inventory item', err as Error, { 
+        component: 'useInventoryItems',
+        itemId: id 
+      });
+      throw err;
+    }
+  };
+
+  const updateStock = async (id: string, quantity: number) => {
+    try {
+      const data = await InventoryAPI.updateStock(id, quantity);
+      await fetchItems();
+      return data;
+    } catch (err) {
+      logger.error('Failed to update stock', err as Error, { 
+        component: 'useInventoryItems',
+        itemId: id 
+      });
+      throw err;
+    }
+  };
+
+  const getLowStock = async () => {
+    try {
+      return await InventoryAPI.getLowStock();
+    } catch (err) {
+      logger.error('Failed to get low stock items', err as Error, { 
+        component: 'useInventoryItems' 
+      });
+      throw err;
+    }
+  };
+
+  const searchItems = async (query: string) => {
+    try {
+      return await InventoryAPI.search(query);
+    } catch (err) {
+      logger.error('Failed to search inventory', err as Error, { 
+        component: 'useInventoryItems',
+        query 
+      });
+      throw err;
+    }
+  };
+
+  return {
+    items,
+    loading,
+    error,
+    fetchItems,
+    createItem,
+    updateItem,
+    deleteItem,
+    updateStock,
+    getLowStock,
+    searchItems,
+  };
+}
       .single();
 
     if (updateError) throw updateError;

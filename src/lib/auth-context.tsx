@@ -1,13 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, RolePermissions } from '@/lib/types';
 import { getRolePermissions } from '@/lib/permissions';
-import { useKV } from '@github/spark/hooks';
+import { supabase } from '@/lib/supabase';
+import { config } from '@/lib/config';
+import { loginRateLimiter, getClientIdentifier } from '@/lib/rate-limiter';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
   permissions: RolePermissions | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -16,45 +20,130 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<RolePermissions | null>(null);
-  const [users] = useKV<User[]>('users', []);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
-      setPermissions(getRolePermissions(userData.role));
-    }
+    // Check active session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserProfile(session.user);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        await fetchUserProfile(session.user);
+      } else {
+        setUser(null);
+        setPermissions(null);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (username: string, _password: string): Promise<boolean> => {
-    // ⚠️ CRITICAL SECURITY WARNING ⚠️
-    // This is DEMO authentication only - password is NOT validated!
-    // DO NOT deploy to production without replacing this with real authentication.
-    // See SECURITY_BEST_PRACTICES.md for implementation requirements.
-    
-    // Fail-safe: Prevent accidental production deployment
-    if (import.meta.env.PROD && import.meta.env.VITE_ENABLE_DEMO_MODE !== 'true') {
-      console.error('SECURITY: Demo authentication is disabled in production');
-      return false;
+  const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        
+        // If user doesn't exist in users table, create a basic profile
+        if (error.code === 'PGRST116') {
+          const newUser: User = {
+            id: supabaseUser.id,
+            username: supabaseUser.email?.split('@')[0] || 'user',
+            name: supabaseUser.user_metadata?.name || supabaseUser.email || 'User',
+            email: supabaseUser.email || '',
+            role: 'staff',
+            locationId: 'default',
+            avatarUrl: supabaseUser.user_metadata?.avatar_url,
+          };
+
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert([newUser]);
+
+          if (!insertError) {
+            setUser(newUser);
+            setPermissions(getRolePermissions(newUser.role));
+          }
+        }
+      } else if (data) {
+        setUser(data as User);
+        setPermissions(getRolePermissions(data.role));
+      }
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    const foundUser = users?.find((u) => u.username === username);
-    
-    if (foundUser) {
-      setUser(foundUser);
-      setPermissions(getRolePermissions(foundUser.role));
-      localStorage.setItem('currentUser', JSON.stringify(foundUser));
-      return true;
-    }
-    
-    return false;
   };
 
-  const logout = () => {
-    setUser(null);
-    setPermissions(null);
-    localStorage.removeItem('currentUser');
+  const login = async (email: string, password: string): Promise<boolean> => {
+    // Check rate limiting
+    const clientId = getClientIdentifier();
+    const rateLimitCheck = loginRateLimiter.check(clientId);
+
+    if (!rateLimitCheck.allowed) {
+      const waitMinutes = Math.ceil((rateLimitCheck.resetTime - Date.now()) / 60000);
+      console.error(`Too many login attempts. Please try again in ${waitMinutes} minutes.`);
+      throw new Error(`Too many login attempts. Please try again in ${waitMinutes} minutes.`);
+    }
+
+    // Demo mode fallback for development
+    if (config.enableDemoMode && !config.environment.includes('production')) {
+      console.warn('Using demo authentication - not for production use');
+      return false;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Login error:', error.message);
+        return false;
+      }
+
+      if (data.user) {
+        // Reset rate limiter on successful login
+        loginRateLimiter.reset(clientId);
+        await fetchUserProfile(data.user);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Login exception:', error);
+      return false;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error);
+      }
+      setUser(null);
+      setPermissions(null);
+    } catch (error) {
+      console.error('Logout exception:', error);
+    }
   };
 
   return (
@@ -62,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         permissions,
+        loading,
         login,
         logout,
         isAuthenticated: !!user,

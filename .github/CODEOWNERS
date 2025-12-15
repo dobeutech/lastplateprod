@@ -1,0 +1,27 @@
+# Code Owners
+# These owners will be automatically requested for review when someone opens a pull request.
+
+# Default owners for everything in the repo
+* @dobeutech
+
+# Infrastructure and deployment
+/Dockerfile @dobeutech
+/nginx.conf @dobeutech
+/.github/workflows/ @dobeutech
+/.devcontainer/ @dobeutech
+
+# Security-sensitive files
+/src/lib/auth-context.tsx @dobeutech
+/src/lib/config.ts @dobeutech
+/src/lib/supabase.ts @dobeutech
+/src/lib/rate-limiter.ts @dobeutech
+/src/lib/session-manager.ts @dobeutech
+
+# Documentation
+/docs/ @dobeutech
+/*.md @dobeutech
+
+# Configuration files
+/.env.example @dobeutech
+/package.json @dobeutech
+/tsconfig.json @dobeutech
