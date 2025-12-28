@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { PurchaseOrder, PurchaseOrderItem } from '@/lib/vendor-types';
 
@@ -7,11 +7,7 @@ export function usePurchaseOrders(locationId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    fetchOrders();
-  }, [locationId]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       let query = supabase
@@ -32,7 +28,11 @@ export function usePurchaseOrders(locationId?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [locationId]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const createOrder = async (order: Partial<PurchaseOrder>, items: Partial<PurchaseOrderItem>[]) => {
     // Insert order
@@ -107,11 +107,7 @@ export function usePurchaseOrderItems(orderId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    fetchItems();
-  }, [orderId]);
-
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error: fetchError } = await supabase
@@ -126,7 +122,11 @@ export function usePurchaseOrderItems(orderId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
 
   return { items, loading, error, refetch: fetchItems };
 }

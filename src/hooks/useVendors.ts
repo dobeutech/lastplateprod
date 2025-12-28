@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Vendor, VendorPerformance } from '@/lib/vendor-types';
 
@@ -7,11 +7,7 @@ export function useVendors() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    fetchVendors();
-  }, []);
-
-  const fetchVendors = async () => {
+  const fetchVendors = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error: fetchError } = await supabase
@@ -26,7 +22,11 @@ export function useVendors() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchVendors();
+  }, [fetchVendors]);
 
   const createVendor = async (vendor: Partial<Vendor>) => {
     const { data, error: createError } = await supabase
@@ -79,11 +79,7 @@ export function useVendorPerformance(locationId?: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    fetchPerformance();
-  }, [locationId]);
-
-  const fetchPerformance = async () => {
+  const fetchPerformance = useCallback(async () => {
     try {
       setLoading(true);
       let query = supabase
@@ -103,7 +99,11 @@ export function useVendorPerformance(locationId?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [locationId]);
+
+  useEffect(() => {
+    fetchPerformance();
+  }, [fetchPerformance]);
 
   return { performance, loading, error, refetch: fetchPerformance };
 }

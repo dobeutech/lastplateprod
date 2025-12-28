@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { InventoryAPI, InventoryItem as APIInventoryItem, CreateInventoryItemInput } from '@/lib/api/inventory';
 import { logger } from '@/lib/logger';
+import { supabase } from '@/lib/supabase';
 
 // Re-export for compatibility
 export type InventoryItem = APIInventoryItem;
@@ -120,33 +121,35 @@ export function useInventoryItems(locationId?: string) {
     searchItems,
   };
 }
-      .single();
 
-    if (updateError) throw updateError;
-    await fetchItems();
-    return data;
-  };
-
-  return {
-    items,
-    loading,
-    error,
-    refetch: fetchItems,
-    createItem,
-    updateItem,
-  };
+// Type definitions for additional hooks
+interface InventoryLevel {
+  id: string;
+  item_name: string;
+  current_level: number;
+  min_level: number;
+  max_level: number;
+  unit: string;
+  restaurant_id: string;
 }
 
+interface InventoryTransaction {
+  id: string;
+  location_id: string;
+  item_id: string;
+  quantity: number;
+  transaction_type: string;
+  transaction_date: string;
+  notes?: string;
+}
+
+// Inventory levels hook with supabase integration
 export function useInventoryLevels(restaurantId: string) {
   const [levels, setLevels] = useState<InventoryLevel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    fetchLevels();
-  }, [restaurantId]);
-
-  const fetchLevels = async () => {
+  const fetchLevels = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error: fetchError } = await supabase
@@ -162,7 +165,11 @@ export function useInventoryLevels(restaurantId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [restaurantId]);
+
+  useEffect(() => {
+    fetchLevels();
+  }, [fetchLevels]);
 
   return { levels, loading, error, refetch: fetchLevels };
 }
@@ -172,11 +179,7 @@ export function useInventoryTransactions(locationId: string, limit = 50) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [locationId]);
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error: fetchError } = await supabase
@@ -193,7 +196,11 @@ export function useInventoryTransactions(locationId: string, limit = 50) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [locationId, limit]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   const createTransaction = async (transaction: Partial<InventoryTransaction>) => {
     const { data, error: createError } = await supabase
