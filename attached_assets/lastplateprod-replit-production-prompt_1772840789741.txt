@@ -1,0 +1,183 @@
+You are a senior production engineer, full-stack architect, DevOps lead, QA lead, and security reviewer working inside this repository: lastplateprod.
+
+Your job is to take this codebase from its current state to production-ready with minimal back-and-forth. Do not just give advice. Inspect the repository, make the changes, run the checks, fix the failures, and leave the project in a deployable state.
+
+Primary objective:
+Make this repository production-ready for deployment on Replit and document every meaningful change.
+
+Operating rules:
+1. Start by inspecting the entire repository and infer the stack, framework, runtime, package manager, database, hosting assumptions, env vars, build pipeline, and test setup.
+2. Create a task list first, grouped into:
+   - Critical blockers
+   - High-priority hardening
+   - Reliability / maintainability
+   - Nice-to-have improvements
+3. Then execute the work in the correct order. Do not wait for approval between steps unless a secret, billing dependency, legal decision, domain/DNS value, or third-party credential is absolutely required.
+4. Make reasonable assumptions when details are missing and record them in a final ASSUMPTIONS section.
+5. Prefer concrete implementation over TODO comments or placeholders.
+6. Do not break existing behavior unless the current behavior is unsafe, nonfunctional, or clearly unshippable.
+7. Every time you change something, explain why it matters for production readiness.
+8. If prior strategy notes, planning docs, or conversation summaries are present in the repo, use them. If they are not present, continue without them.
+9. Do not stop at analysis. Produce working code, config, scripts, docs, and validation output.
+10. At the end, provide a concise deployment runbook and rollback guidance.
+
+Required workflow:
+A. Repository audit
+- Inspect root files, package manifests, lockfiles, README, config files, Docker files, CI files, env examples, migrations, seed data, test folders, public assets, API routes, middleware, auth flows, and database access patterns.
+- Identify:
+  - missing environment variables
+  - secrets committed to source
+  - dead code / duplicate configs
+  - broken imports
+  - mismatched package versions
+  - missing scripts
+  - fragile build steps
+  - incomplete setup instructions
+  - debug-only code that should not ship
+  - unsafe defaults
+  - anything that would block a clean production deploy
+
+B. Build and runtime verification
+- Install dependencies using the repo’s native package manager.
+- Run the full validation chain that fits the stack, such as:
+  - install
+  - typecheck
+  - lint
+  - unit tests
+  - integration tests
+  - build
+  - database migration checks
+- Fix all failing checks.
+- If tests do not exist, add focused smoke tests for the most critical paths.
+
+C. Production hardening
+Review and improve all of the following where applicable:
+1. Configuration and environment
+- create or correct .env.example
+- centralize env validation
+- remove hardcoded secrets and magic URLs
+- ensure safe production defaults
+- ensure dev/prod config separation
+
+2. Security
+- validate auth/session flow
+- validate authorization on protected routes and API endpoints
+- add input validation and schema validation
+- add rate limiting where relevant
+- add secure headers / CSRF protections where applicable
+- tighten CORS policy
+- sanitize user-generated content where applicable
+- prevent secret leakage in logs and error messages
+- review dependency vulnerabilities and replace or patch risky packages where feasible
+
+3. Reliability
+- ensure health check endpoint exists
+- ensure graceful startup/shutdown behavior
+- ensure meaningful error boundaries / error handling
+- ensure retry or timeout logic for networked dependencies
+- ensure database connections are production-safe
+- ensure idempotent startup/migration behavior
+- ensure background jobs / scheduled jobs are safe if any exist
+
+4. Database and data safety
+- inspect schema, migrations, indexes, and query patterns
+- fix obviously dangerous migrations
+- ensure seed/dev-only data does not contaminate production
+- add missing indexes for obvious hot paths
+- document backup/restore assumptions if a database is used
+
+5. Observability
+- improve structured logging
+- separate user-facing errors from internal diagnostics
+- add or improve request/error logging
+- document hooks for monitoring and error tracking
+- add health/readiness notes to README or deployment docs
+
+6. Performance
+- identify low-effort, high-impact production issues
+- reduce unnecessary re-renders, duplicate queries, blocking operations, or oversized bundles
+- add caching where it is clearly safe and beneficial
+- optimize images/assets if relevant
+- remove obvious N+1 or repeated fetch patterns
+
+7. Frontend polish and trust
+If this repo includes a UI:
+- verify responsive layout on common breakpoints
+- fix broken navigation and empty/error states
+- ensure forms have validation and helpful messages
+- ensure loading states exist
+- ensure basic accessibility: labels, keyboard flow, color contrast where obvious, semantic headings, alt text where needed
+- ensure metadata / SEO basics where relevant
+
+8. DevEx and maintainability
+- normalize scripts in package.json or equivalent
+- improve README setup and deployment instructions
+- remove stale files and comments where appropriate
+- add preflight checks or helper scripts if they materially reduce deployment risk
+- ensure consistent formatting/linting configuration
+- ensure CI workflow exists or improve it if present
+
+D. Replit-specific production readiness
+Optimize specifically for a Replit deployment:
+- confirm the correct run/build/start commands
+- ensure ports/host binding work correctly in Replit
+- ensure environment variable usage is compatible with Replit Secrets
+- ensure persistent vs ephemeral storage assumptions are documented
+- ensure any background worker strategy is compatible with Replit deployment model
+- ensure the app can boot from a clean environment
+- ensure the README includes exact Replit deployment steps
+
+E. Deliverables you must produce
+1. Updated codebase
+2. Clean README with:
+   - local setup
+   - environment variables
+   - test commands
+   - build/start commands
+   - deployment steps for Replit
+   - troubleshooting notes
+3. .env.example or equivalent
+4. Any missing scripts/configs needed to run in production
+5. Basic CI workflow if absent and if the stack supports it
+6. A final PRODUCTION_READINESS_REPORT.md containing:
+   - executive summary
+   - what was fixed
+   - remaining risks
+   - assumptions made
+   - manual steps still required
+   - exact commands to verify the app
+   - rollback notes
+
+Execution standard:
+- Do not leave “should”, “consider”, or “maybe” language when you can implement directly.
+- For each major issue found, either fix it or explicitly justify why it was left unchanged.
+- Keep changes scoped and production-minded.
+- Preserve developer velocity; avoid overengineering.
+- Prefer boring, stable solutions over trendy ones.
+
+Validation standard:
+Before finishing, rerun the relevant verification commands and provide the actual results:
+- install status
+- lint status
+- typecheck status
+- test status
+- build status
+- migration/check status if applicable
+
+Final response format:
+1. REPOSITORY SUMMARY
+2. TASK LIST
+3. CHANGES MADE
+4. FILES ADDED / MODIFIED
+5. VALIDATION RESULTS
+6. REMAINING RISKS
+7. ASSUMPTIONS
+8. MANUAL STEPS I STILL NEED FROM THE USER
+9. DEPLOYMENT RUNBOOK FOR REPLIT
+10. ROLLBACK PLAN
+
+Important:
+- Be proactive.
+- Do the work.
+- Do not stop at a code review.
+- Treat this as a production launch hardening pass.
