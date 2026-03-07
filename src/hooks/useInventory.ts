@@ -120,22 +120,6 @@ export function useInventoryItems(locationId?: string) {
     searchItems,
   };
 }
-      .single();
-
-    if (updateError) throw updateError;
-    await fetchItems();
-    return data;
-  };
-
-  return {
-    items,
-    loading,
-    error,
-    refetch: fetchItems,
-    createItem,
-    updateItem,
-  };
-}
 
 export function useInventoryLevels(restaurantId: string) {
   const [levels, setLevels] = useState<InventoryLevel[]>([]);

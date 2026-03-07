@@ -13,7 +13,6 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    // DO NOT REMOVE
     createIconImportProxy() as PluginOption,
     sparkPlugin() as PluginOption,
   ],
@@ -21,5 +20,29 @@ export default defineConfig({
     alias: {
       '@': resolve(projectRoot, 'src')
     }
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5000,
+    allowedHosts: ['.replit.dev', '.repl.co'],
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-radix': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+          ],
+          'vendor-charts': ['recharts', 'd3'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
   },
 });

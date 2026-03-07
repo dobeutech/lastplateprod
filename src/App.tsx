@@ -122,7 +122,34 @@ function AppContent() {
   );
 }
 
+function SetupRequired() {
+  const missingVars = (window as any).__MISSING_ENV_VARS as string[] | undefined;
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-lg text-center space-y-6">
+        <h1 className="text-2xl font-bold">SavePlate Setup Required</h1>
+        <p className="text-muted-foreground">
+          The following environment variables must be configured before the app can start:
+        </p>
+        <ul className="text-left bg-muted/50 rounded-lg p-4 space-y-2">
+          {(missingVars || ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY']).map((v) => (
+            <li key={v} className="font-mono text-sm text-destructive">{v}</li>
+          ))}
+        </ul>
+        <p className="text-sm text-muted-foreground">
+          Set these as Replit Secrets (prefixed with VITE_) or in a local .env file, then restart the application.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  const missingVars = (window as any).__MISSING_ENV_VARS as string[] | undefined;
+  if (missingVars && missingVars.length > 0) {
+    return <SetupRequired />;
+  }
+
   return (
     <WasteAuthProvider>
       <IntercomProvider>
