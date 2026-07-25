@@ -1,4 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from './config';
 
-export const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+const url = config.supabaseUrl || 'https://placeholder.supabase.co';
+const key = config.supabaseAnonKey || 'placeholder';
+
+export const supabase = createClient(url, key);

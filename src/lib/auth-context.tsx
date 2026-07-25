@@ -4,6 +4,7 @@ import { getRolePermissions } from '@/lib/permissions';
 import { supabase } from '@/lib/supabase';
 import { config } from '@/lib/config';
 import { loginRateLimiter, getClientIdentifier } from '@/lib/rate-limiter';
+import { logger } from '@/lib/logger';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -57,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error fetching user profile:', error);
+        logger.error('Error fetching user profile', error as Error);
         
         // If user doesn't exist in users table, create a basic profile
         if (error.code === 'PGRST116') {
@@ -85,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setPermissions(getRolePermissions(data.role));
       }
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
+      logger.error('Error in fetchUserProfile', error as Error);
     } finally {
       setLoading(false);
     }
@@ -98,13 +99,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!rateLimitCheck.allowed) {
       const waitMinutes = Math.ceil((rateLimitCheck.resetTime - Date.now()) / 60000);
-      console.error(`Too many login attempts. Please try again in ${waitMinutes} minutes.`);
       throw new Error(`Too many login attempts. Please try again in ${waitMinutes} minutes.`);
     }
 
-    // Demo mode fallback for development
-    if (config.enableDemoMode && !config.environment.includes('production')) {
-      console.warn('Using demo authentication - not for production use');
+    if (config.enableDemoMode && config.environment !== 'production') {
       return false;
     }
 
@@ -115,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        console.error('Login error:', error.message);
+        logger.error('Login failed', new Error(error.message));
         return false;
       }
 
@@ -128,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return false;
     } catch (error) {
-      console.error('Login exception:', error);
+      logger.error('Login exception', error as Error);
       return false;
     }
   };
@@ -137,12 +135,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('Logout error:', error);
+        logger.error('Logout error', error as Error);
       }
       setUser(null);
       setPermissions(null);
     } catch (error) {
-      console.error('Logout exception:', error);
+      logger.error('Logout exception', error as Error);
     }
   };
 
