@@ -1,11 +1,36 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: "daily"
-
-  - package-ecosystem: "devcontainers"
-    directory: "/"
+      interval: weekly
+    groups:
+      all-minor-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+      all-major:
+        patterns:
+          - '*'
+        update-types:
+          - major
+    open-pull-requests-limit: 5
+  - package-ecosystem: devcontainers
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
+    groups:
+      all-minor-patch:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+      all-major:
+        patterns:
+          - '*'
+        update-types:
+          - major
+    open-pull-requests-limit: 5
