@@ -1,0 +1,17 @@
+{
+  "name": "SavePlate",
+  "install": "npm ci",
+  "ports": [
+    {
+      "name": "dev server",
+      "port": 5000
+    }
+  ],
+  "terminals": [
+    {
+      "name": "dev server",
+      "command": "VITE_SUPABASE_URL=\"${VITE_SUPABASE_URL:-https://placeholder.supabase.co}\" VITE_SUPABASE_ANON_KEY=\"${VITE_SUPABASE_ANON_KEY:-placeholder-anon-key}\" npm run dev",
+      "description": "Vite dev server for the SavePlate frontend on port 5000. Uses real VITE_SUPABASE_* secrets when present, otherwise safe dev placeholders so the UI renders."
+    }
+  ]
+}
